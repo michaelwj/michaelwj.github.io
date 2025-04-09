@@ -76,9 +76,8 @@
   </div>
   
   <div class="step hidden" id="step4">
-    <h2>Success! Here's your refresh token:</h2>
-    <pre id="tokenDisplay"></pre>
-    <p>Copy this refresh token and send it to the person who needs it.</p>
+    <h2>Final Step: Get Your Refresh Token</h2>
+    <div id="tokenDisplay"></div>
   </div>
   
   <div class="step hidden" id="error">
@@ -145,41 +144,43 @@
       try {
         const redirectUri = window.location.origin + window.location.pathname;
         
-        // Need to use a CORS proxy for browser-based requests
-        // In a real application, you'd use your own server for this step
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const tokenUrl = 'https://api.dropbox.com/oauth2/token';
-        
-        const response = await fetch(proxyUrl + tokenUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            code: code,
-            grant_type: 'authorization_code',
-            client_id: appKey,
-            client_secret: appSecret,
-            redirect_uri: redirectUri
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.error) {
-          showError("Error getting token: " + data.error_description || data.error);
-          return;
-        }
-        
-        if (!data.refresh_token) {
-          showError("No refresh token was returned. Make sure your app is set up correctly with 'token_access_type=offline'");
-          return;
-        }
-        
-        // Show the token
+        // Since we can't make a direct API call from the browser due to CORS,
+        // we'll show instructions for manually completing the token exchange
         document.getElementById('step3').classList.add('hidden');
         document.getElementById('step4').classList.remove('hidden');
-        document.getElementById('tokenDisplay').textContent = data.refresh_token;
+        
+        // Generate the curl command they can use
+        const curlCommand = `curl -X POST https://api.dropbox.com/oauth2/token \\
+  --data-urlencode "code=${code}" \\
+  --data-urlencode "grant_type=authorization_code" \\
+  --data-urlencode "client_id=${appKey}" \\
+  --data-urlencode "client_secret=${appSecret}" \\
+  --data-urlencode "redirect_uri=${redirectUri}"`;
+        
+        document.getElementById('tokenDisplay').innerHTML = `
+<p><strong>Due to browser security restrictions, we need to complete this step manually.</strong></p>
+
+<p>Option 1: If you have access to a terminal/command prompt, run this command:</p>
+<pre>${curlCommand}</pre>
+
+<p>Option 2: Use this online tool:</p>
+<ol>
+  <li>Go to <a href="https://reqbin.com/" target="_blank">ReqBin</a></li>
+  <li>Enter URL: <code>https://api.dropbox.com/oauth2/token</code></li>
+  <li>Select Method: <code>POST</code></li>
+  <li>Click "Content" tab and select "x-www-form-urlencoded"</li>
+  <li>Add these form fields:
+    <ul>
+      <li>code: <code>${code}</code></li>
+      <li>grant_type: <code>authorization_code</code></li>
+      <li>client_id: <code>${appKey}</code></li>
+      <li>client_secret: <code>${appSecret}</code></li>
+      <li>redirect_uri: <code>${redirectUri}</code></li>
+    </ul>
+  </li>
+  <li>Click "Send" and look for "refresh_token" in the response</li>
+</ol>
+`;
         
         // Clear stored credentials
         localStorage.removeItem('dropboxAppKey');
