@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <h1>Dropbox Refresh Token Generator v2</h1>
+  <h1>Dropbox Refresh Token Generator v3</h1>
   
   <div class="step" id="step1">
     <h2>Step 1: Enter your Dropbox App credentials</h2>
@@ -160,26 +160,8 @@
         document.getElementById('tokenDisplay').innerHTML = `
 <p><strong>Due to browser security restrictions, we need to complete this step manually.</strong></p>
 
-<p>Option 1: If you have access to a terminal/command prompt, run this command:</p>
+<p>If you have access to a terminal/command prompt, run this command:</p>
 <pre>${curlCommand}</pre>
-
-<p>Option 2: Use this online tool:</p>
-<ol>
-  <li>Go to <a href="https://reqbin.com/" target="_blank">ReqBin</a></li>
-  <li>Enter URL: <code>https://api.dropbox.com/oauth2/token</code></li>
-  <li>Select Method: <code>POST</code></li>
-  <li>Click "Content" tab and select "x-www-form-urlencoded"</li>
-  <li>Add these form fields:
-    <ul>
-      <li>code: <code>${code}</code></li>
-      <li>grant_type: <code>authorization_code</code></li>
-      <li>client_id: <code>${appKey}</code></li>
-      <li>client_secret: <code>${appSecret}</code></li>
-      <li>redirect_uri: <code>${redirectUri}</code></li>
-    </ul>
-  </li>
-  <li>Click "Send" and look for "refresh_token" in the response</li>
-</ol>
 `;
         
         // Clear stored credentials
